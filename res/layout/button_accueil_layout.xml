@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <ImageView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="95"
+        />
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:textSize="@dimen/im_text_size"
+        android:gravity="center"
+        android:visibility="gone"
+        />
+
+</merge>

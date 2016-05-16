@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Airpad_PIR</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="regl">Reglage</string>
+    <string name="drone">Drone</string>
+    <string name="programmation">Programmation</string>
+    <string name="apropos">A propos</string>
+    <string name="tuto">Tutoriel</string>
+    <dimen name="circ_layout_width">400dp</dimen>
+    <dimen name="circ_layout_height">300dp</dimen>
+    <dimen name="im_focus_width">250dp</dimen>
+    <dimen name="im_focus_height">280dp</dimen>
+    <dimen name="im_unfocused_width">160dp</dimen>
+    <dimen name="im_unfocused_height">175dp</dimen>
+    <dimen name="im_text_size">20sp</dimen>
+    <dimen name="im_text_height">30dp</dimen>
+    <color name="border_color">#1EF2C1</color>
+    <color name="background_enabled_color">#4D5252</color>
+    <color name="background_focused_color">#BDC9C4</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="light_grey">#f0f8ff</color>
+    <color name="another_grey">#e3e0e0</color>
+    <color name="button_theme">#252D35</color>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="separator">1dp</dimen>
+    <dimen name="information_bar_height">35dp</dimen>
+
+</resources>

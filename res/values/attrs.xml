@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Options">
+        <attr name="icon" format="integer"/>
+        <attr name="text" format="string" localization="suggested"/>
+    </declare-styleable>
+    
+    <declare-styleable name="Joystick">
+        <attr name="stick_scale" format="float"/>
+        <attr name="stroke_start_color" format="color"/>
+        <attr name="stroke_end_color" format="color"/>
+        <attr name="stroke_middle_color" format="color" />
+        <attr name="joy_image" format="integer"/>
+    </declare-styleable>
+</resources>
