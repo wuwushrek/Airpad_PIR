@@ -6,76 +6,381 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
-    tools:context=".JoystickActivity"
-    >
-    <LinearLayout 
+    android:clipChildren="false"
+    tools:context=".JoystickActivity" >
+
+    <LinearLayout
         android:id="@+id/lin_lay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        >
+        android:gravity="center"
+        android:orientation="vertical" >
+
         <TextView
             android:id="@+id/angleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            />
+            android:textColor="@color/white" />
+
         <TextView
             android:id="@+id/powerTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            />
-        <TextView
-            android:id="@+id/directionTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
+            android:textColor="@color/white" />
     </LinearLayout>
-   <!-- <com.example.airpad_pir.JoystickCustomView
+
+    <com.example.airpad_pir.JoystickCustomView
         android:id="@+id/joystickView"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        custom:stick_scale="0.4"
-        custom:left="true"
-        custom:stroke="5dp"
-        /> -->
-     <com.example.airpad_pir.JoystickCustomView
-        android:id="@+id/joystickView"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
         android:visibility="invisible"
+        android:alpha="0.7"
+        custom:joy_image="@drawable/joystick_button"
         custom:stick_scale="0.4"
-        custom:stroke_start_color="@color/light_grey"
         custom:stroke_end_color="@color/another_grey"
         custom:stroke_middle_color="@color/black"
-        custom:joy_image="@drawable/joystick_button"
-        /> 
-        <View 
-            android:layout_centerHorizontal="true"
-            android:layout_width="@dimen/separator"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            />
-        <RelativeLayout 
-            android:id="@+id/inforamtion_view"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/information_bar_height"
-            android:background="@color/button_theme"
-            android:layout_alignParentBottom="true"
-            >
-            
-        </RelativeLayout>
-        <com.example.airpad_pir.SpeedometerGauge 
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/speedometer"
-            android:alpha="0.4"
-            android:layout_centerInParent="true"/>
+        custom:stroke_start_color="@color/light_grey" />
+    <!--  <com.example.airpad_pir.JoystickCustomView 
+        android:id="@+id/throttleView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:visibility="invisible"
+        android:alpha="0.7"
+        />-->
 
+    <View
+        android:layout_width="@dimen/separator"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:background="@color/white" />
+    
+    <RelativeLayout 
+        android:id="@+id/top_menu"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/top_menu_height"
+        android:background="@drawable/top_background">
+        <ImageButton 
+            android:id="@+id/settings_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="60dp"
+            android:src="@drawable/setting_button_control"
+            />
+        <ImageButton 
+            android:id="@+id/start_control"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/battery_data"
+            android:layout_marginLeft="100dp"
+            android:src="@drawable/bluetooth_connex"
+            />
+        <Button 
+            android:id="@+id/emergency"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:text="EMERGENCY"
+            android:textColor="#FF0000"
+            />
+        <TextView 
+            android:id="@+id/battery_data"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="100dp"
+            android:layout_toRightOf="@+id/settings_menu"
+            android:drawableLeft="@drawable/battery_icon"
+            android:text="Inf"
+            android:gravity="center"/>
+        <Chronometer
+            android:id="@+id/chronometre"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="40dp"
+            android:layout_toRightOf="@id/emergency"
+            android:gravity="center"
+            android:textColor="#4169E1"
+            android:textSize="30sp" />
+        <ImageButton 
+            android:id="@+id/camera_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/camera_control"
+            android:layout_toRightOf="@id/chronometre"
+            android:layout_marginLeft="40dp"
+            />
+        <Button 
+            android:id="@+id/mission_control"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:drawableLeft="@drawable/mission_icon"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:text="Missions"/>
+        
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/information_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/information_bar_height"
+        android:background="@drawable/top_menu_icon"
+        android:layout_alignParentBottom="true"
+        android:alpha="0.6"
+        android:clipChildren="false"
+        android:clipToPadding="false" >
+
+        <Button
+            android:id="@+id/hauteur_but"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="10dp"
+            android:background="@android:color/transparent"
+            android:drawableLeft="@drawable/height"
+            android:gravity="center"
+            android:text="1 m" />
+
+        <LinearLayout
+            android:id="@+id/home_back_lin"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/home_control"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/home1"
+                android:gravity="center" />
+
+            <Button
+                android:id="@+id/back_control"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/object_rotate_left"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/activate_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/circle_distance"
+            android:background="@android:color/transparent"
+            android:src="@drawable/off_speed" />
+
+        <Button
+            android:id="@+id/circle_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/hauteur_but"
+            android:background="@android:color/transparent"
+            android:drawableLeft="@drawable/circle_dist"
+            android:gravity="center"
+            android:text="10 cm" />
+
+        <ImageView
+            android:id="@+id/drone_position"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/activate_speed"
+            android:background="@android:color/transparent"
+            android:src="@drawable/off_plan_view" />
+
+        <ImageButton
+            android:id="@+id/help_control_page"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/help_and_support" />
+
+        <ImageButton
+            android:id="@+id/program_control"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/home_back_lin"
+            android:background="@android:color/transparent"
+            android:src="@drawable/program_group" />
+
+        <ImageView
+            android:id="@+id/play_enable"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/pause_disable"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/play_enabled" />
+
+        <ImageView
+            android:id="@+id/pause_disable"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/stop_button"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/pause_disable" />
+
+        <ImageView
+            android:id="@+id/stop_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@id/help_control_page"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/stop_disabled" />
+
+    </RelativeLayout>
+
+    <!-- <Button
+        android:id="@+id/settings_menu"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="20dp"
+        android:gravity="center"
+        android:text="Reglages" />	 -->
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/information_view"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/top_menu"
+        android:visibility="gone"
+        android:background="#3A3A3A">
+
+        <TextView
+            android:id="@+id/joystick_sensibility"
+            android:layout_width="60dp"
+            android:layout_height="@dimen/setting_item_size"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center|left"
+            android:text="Joystick"
+            android:textColor="#FFFFFF" />
+
+        <SeekBar
+            android:id="@+id/joystick_sensibility_seek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/joystick_sensibility"
+            android:layout_marginTop="20dp"
+            android:layout_toRightOf="@id/joystick_sensibility"
+            android:max="100"
+            android:progress="50"
+            android:progressDrawable="@drawable/seek_custom"
+            android:thumb="@drawable/thumb_seek" />
+        <Button 
+            android:id="@+id/plus_joystick"
+            android:layout_width="90dp"
+            android:layout_height="@dimen/setting_item_size"
+            android:text="+"
+            android:layout_alignParentLeft="true"
+		    android:layout_below="@id/joystick_sensibility"
+            />
+		<Button 
+		    android:id="@+id/moins_joystick"
+		    android:layout_width="90dp"
+		    android:layout_height="@dimen/setting_item_size"
+		    android:layout_toRightOf="@id/plus_joystick"
+		    android:layout_alignTop="@id/plus_joystick"
+		    android:text="-"
+		    android:layout_alignParentRight="true"
+		    />
+        <TextView
+            android:id="@+id/speed_sensibility"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/setting_item_size"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@id/joystick_sensibility"
+            android:layout_below="@id/plus_joystick"
+            android:gravity="center|left"
+            android:text="Throttle"
+            android:textColor="#FFFFFF" />
+
+        <SeekBar
+            android:id="@+id/speed_sensibility_seek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/joystick_sensibility_seek"
+            android:layout_alignRight="@id/joystick_sensibility_seek"
+            android:layout_alignTop="@id/speed_sensibility"
+            android:layout_marginTop="20dp"
+            android:layout_toRightOf="@id/speed_sensibility"
+            android:max="100"
+            android:progress="50"
+            android:progressDrawable="@drawable/seek_custom"
+            android:thumb="@drawable/thumb_seek" />
+        
+        <Button 
+            android:id="@+id/plus_throttle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/setting_item_size"
+            android:text="+"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@id/plus_joystick"
+            android:layout_below="@id/speed_sensibility"
+            />
+		<Button 
+		    android:id="@+id/moins_throttle"
+		    android:layout_width="90dp"
+		    android:layout_height="@dimen/setting_item_size"
+		    android:layout_alignTop="@id/plus_throttle"
+		    android:layout_toRightOf="@id/plus_throttle"
+		    android:text="-"
+		    android:layout_alignParentRight="true"
+		    android:layout_alignLeft="@id/moins_joystick"
+		    />
+
+        <TextView
+            android:id="@+id/gyro_select"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/setting_item_size"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@id/speed_sensibility"
+            android:layout_below="@id/moins_throttle"
+            android:gravity="center|left"
+            android:text="Accelero"
+            android:textColor="#FFFFFF" />
+
+        <Switch
+            android:id="@+id/gyro_select_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/gyro_select"
+            android:layout_marginLeft="15dp"
+            android:layout_alignTop="@id/gyro_select"
+            android:layout_toRightOf="@id/gyro_select"/>
+    </RelativeLayout>
+    <com.example.airpad_pir.Drone2DRendering
+        android:id="@+id/droneVue"
+        android:layout_width="400dp"
+        android:layout_height="250dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:alpha="1.0"
+        />
+
+    <com.example.airpad_pir.SpeedometerGauge
+        android:id="@+id/speedometer_gauge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:alpha="0.5" />
 </RelativeLayout>

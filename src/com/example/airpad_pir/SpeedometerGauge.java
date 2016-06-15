@@ -12,9 +12,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.View.MeasureSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +74,17 @@ public class SpeedometerGauge extends View {
         setLabelTextSize(Math.round(DEFAULT_LABEL_TEXT_SIZE_DP * density));
         setUnitsTextSize(Math.round(DEFAULT_UNITS_TEXT_SIZE_DP * density));
     }
+    
+    public SpeedometerGauge(Context context, AttributeSet attrs,
+			int defaultStyle) {
+		super(context, attrs, defaultStyle);
+        init();
 
+        float density = getResources().getDisplayMetrics().density;
+        setLabelTextSize(Math.round(DEFAULT_LABEL_TEXT_SIZE_DP * density));
+        setUnitsTextSize(Math.round(DEFAULT_UNITS_TEXT_SIZE_DP * density));
+	}
+    
     public double getMaxSpeed() {
         return maxSpeed;
     }
@@ -265,7 +273,7 @@ public class SpeedometerGauge extends View {
         }
 
         if (height >= 0 && width >= 0) {
-            width = Math.min(height, width);
+            //width = Math.min(height, width);
             height = width/2;
         } else if (width >= 0) {
             height = width/2;
