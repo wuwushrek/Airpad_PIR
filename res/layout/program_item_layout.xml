@@ -1,49 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="100dp"
-    android:layout_height="250dp" >
+    android:layout_height="wrap_content"
+    android:background="@drawable/top_button_selector"
+    android:clickable="true">
     
      <TextView
         android:id="@+id/programName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:textColor="@android:color/white"
         android:gravity="center"
         android:scrollHorizontally="true" />
 
     <ImageView
         android:id="@+id/typeImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_below="@id/programName"
+        android:layout_marginBottom="20dp"
         android:layout_centerHorizontal="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:clickable="false"
         />
 
     <ImageButton
         android:id="@+id/play_program"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/typeImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:alpha="0.7"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="-15dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/item_button_selector"
+        android:visibility="gone"
         android:src="@drawable/play_icon" />
 
     <ImageButton
         android:id="@+id/delete_program"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:alpha="0.7"
         android:layout_toRightOf="@id/play_program"
-        android:layout_alignTop="@id/play_program"
-        android:src="@drawable/delete_icon"
-        android:layout_marginRight="-5dp"/>
+        android:layout_alignTop="@id/typeImage"
+        android:layout_marginLeft="5dp"
+        android:background="@drawable/item_button_selector"
+        android:visibility="gone"
+        android:src="@drawable/delete_icon"/>
 
     <ImageButton
         android:id="@+id/modify_program"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:alpha="0.7"
         android:layout_toLeftOf="@id/play_program"
-        android:layout_alignTop="@id/play_program"
-        android:src="@drawable/pencil_icon"
-        android:layout_marginLeft="-5dp"/>
+        android:layout_alignTop="@id/typeImage"
+        android:layout_marginRight="5dp"
+        android:visibility="gone"
+        android:background="@drawable/item_button_selector"
+        android:src="@drawable/pencil_icon"/>
 
 </RelativeLayout>

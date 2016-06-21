@@ -1,21 +1,19 @@
 package com.example.airpad_pir;
 
-import android.R.interpolator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
-import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
@@ -53,6 +51,7 @@ public class JoystickActivity extends Activity{
 	private RelativeLayout informationL;
 	private RelativeLayout menuContent;
 	
+	private JoystickCustomView throttle;
 	private JoystickCustomView joystick;
 	private SpeedometerGauge speedometer;
 	
@@ -74,7 +73,7 @@ public class JoystickActivity extends Activity{
 	private ImageButton settingButton;
 	private ImageButton startControl;
 	private Button emergencyButton;
-	private TextView battery;
+	private Button battery;
 	private ImageButton cameraButton;
 	private Button missionControl;
 
@@ -114,13 +113,14 @@ public class JoystickActivity extends Activity{
 		settingButton = (ImageButton) findViewById(R.id.settings_menu);
 		startControl = (ImageButton) findViewById(R.id.start_control);
 		emergencyButton = (Button)	findViewById(R.id.emergency);
-		battery = 	(TextView)	findViewById(R.id.battery_data);
+		battery = 	(Button)	findViewById(R.id.battery_data);
 		cameraButton = (ImageButton) findViewById(R.id.camera_button);
 		missionControl = (Button) findViewById(R.id.mission_control);
 
 
 		speedometer= (SpeedometerGauge) findViewById(R.id.speedometer_gauge);
 		joystick = (JoystickCustomView) findViewById(R.id.joystickView);
+		throttle = (JoystickCustomView) findViewById(R.id.throttleView);
 		droneRendering = (Drone2DRendering) findViewById(R.id.droneVue);
 		
 		joystick.setOnJoystickMoveListener(new OnJoystickMoveListener() {
@@ -128,8 +128,16 @@ public class JoystickActivity extends Activity{
 			@Override
 			public void onValueChanged(double angle, double power) {
 				// TODO Auto-generated method stub
-				angleTextView.setText("Angle: " + String.valueOf(angle) + "°");
-				powerTextView.setText("Power: " + String.valueOf(power) + "%");
+				//angleTextView.setText("Angle: " + String.valueOf(angle) + "°");
+				//powerTextView.setText("Power: " + String.valueOf(power) + "%");
+			}
+		}, JoystickCustomView.DEFAULT_LOOP_INTERVAL);
+		throttle.setOnJoystickMoveListener(new OnJoystickMoveListener() {
+
+			@Override
+			public void onValueChanged(double angle, double power) {
+				// TODO Auto-generated method stub
+				//A modifier
 			}
 		}, JoystickCustomView.DEFAULT_LOOP_INTERVAL);
 		
@@ -210,6 +218,7 @@ public class JoystickActivity extends Activity{
 		speedometer.setSpeed(45);
 		informationL.bringToFront();
 		joystick.bringToFront();
+		throttle.bringToFront();
 
 		extraYBottom= getResources().getDimensionPixelSize(R.dimen.information_bar_height);
 		extraYTop =getResources().getDimensionPixelSize(R.dimen.top_menu_height);
@@ -237,9 +246,12 @@ public class JoystickActivity extends Activity{
 	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
+		//System.out.println("NOMBRE POINTER "+ev.getPointerCount()+", "+ev.getPointerId(0)+ (ev.getPointerCount()==2?ev.getPointerId(1):-5));
 		mainLayout.getLocationOnScreen(position);
-		float relativePosX = ev.getX()-position[0];
-		float relativePosY =ev.getY()-position[1];
+		int pointerId = ev.getPointerId(ev.getActionIndex());
+		//System.out.println("POINTER ID "+pointerId); 
+		float relativePosX = ev.getX(ev.getActionIndex())-position[0];
+		float relativePosY =ev.getY(ev.getActionIndex())-position[1];
 		
 		if(ev.getAction()==MotionEvent.ACTION_DOWN && menuContent.getVisibility()== View.VISIBLE 
 				&& relativePosX>menuContent.getWidth()){
@@ -250,6 +262,14 @@ public class JoystickActivity extends Activity{
 		}
 		
 		if(ev.getAction()==MotionEvent.ACTION_UP){
+			//System.out.println("POINTER ID "+pointerId+" , ACTION UP");
+			if(joystick.getCurrentEventId() == pointerId){
+				joystick.setVisibility(View.GONE);
+				joystick.setCurrentEventId(-1);
+			}else if (throttle.getCurrentEventId()== pointerId){
+				throttle.setVisibility(View.GONE);
+				throttle.setCurrentEventId(-1);
+			}
 			long time = System.currentTimeMillis();
 			if((time-lastTapTime)>TIME_TO_TAP || countTap==0){
 				lastTapTime=time;
@@ -262,26 +282,43 @@ public class JoystickActivity extends Activity{
 			}
 		}
 		
-		if(relativePosX<mainLayout.getWidth()/2 && relativePosY<mainLayout.getHeight()-extraYBottom 
-				&& relativePosY>extraYTop){
-			if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-				joystick.setTranslationX(adaptedCoordinate(relativePosX,mainLayout.getWidth()/2,joystick.getWidth()/2));
+		if(ev.getActionMasked()==MotionEvent.ACTION_POINTER_UP){
+			if(joystick.getCurrentEventId()== pointerId){
+				joystick.setVisibility(View.GONE);
+				joystick.setCurrentEventId(-1);
+			}else if(throttle.getCurrentEventId() == pointerId){
+				throttle.setVisibility(View.GONE);
+				throttle.setCurrentEventId(-1);
+			}
+		}
+		
+		if((ev.getActionMasked()== MotionEvent.ACTION_DOWN || ev.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN)
+				&& (ev.getPointerCount()<=2)){
+			if((relativePosX<mainLayout.getWidth()/2) && (relativePosY<mainLayout.getHeight()-extraYBottom) 
+				&& (relativePosY>extraYTop)){
+				joystick.setTranslationX(adaptedCoordinate(relativePosX,0,mainLayout.getWidth()/2,joystick.getWidth()/2));
 				joystick.setTranslationY(adaptedCoordinateY(relativePosY,mainLayout.getHeight(),joystick.getHeight()/2));
 				joystick.setVisibility(View.VISIBLE);
+				joystick.setCurrentEventId(pointerId);
 			}
-			if (ev.getAction() == MotionEvent.ACTION_UP) {
-				joystick.setVisibility(View.GONE);
+			if((relativePosX>mainLayout.getWidth()/2) && (relativePosY<mainLayout.getHeight()-extraYBottom)
+				&& (relativePosY>extraYTop)){
+				throttle.setTranslationX(adaptedCoordinate(relativePosX,mainLayout.getWidth()/2,mainLayout.getWidth(),joystick.getWidth()/2));
+				throttle.setTranslationY(adaptedCoordinateY(relativePosY,mainLayout.getHeight(),joystick.getHeight()/2));
+				throttle.setVisibility(View.VISIBLE);
+				throttle.setCurrentEventId(pointerId);
 			}
+			System.out.println(relativePosX+" , "+relativePosY);
 		}
 		return super.dispatchTouchEvent(ev);
 	}
 	
-	private float adaptedCoordinate(float evX , int width , int viewMidWidth){
-		if(evX-viewMidWidth>0 && evX+viewMidWidth<width){
+	private float adaptedCoordinate(float evX ,float leftLimit,int width , int viewMidWidth){
+		if(evX-viewMidWidth>leftLimit && evX+viewMidWidth<width){
 			return evX-viewMidWidth;
 		}
-		if(evX-viewMidWidth<=0){
-			return 0;
+		if(evX-viewMidWidth<=leftLimit){
+			return leftLimit;
 		}
 		return width- 2*viewMidWidth;
 	}
@@ -449,7 +486,7 @@ public class JoystickActivity extends Activity{
 		}
 	}
 	//1,1.5
-	public Animation scaleAnimation(float startScaleX, float endScaleX,
+	public static Animation scaleAnimation(float startScaleX, float endScaleX,
 			float startScaleY , float endScaleY, float centerX, float centerY){
 		ScaleAnimation scale = new ScaleAnimation(startScaleX,endScaleX,
 				startScaleY,endScaleY,
@@ -459,7 +496,7 @@ public class JoystickActivity extends Activity{
 		return scale;
 	}
 	
-	public Animation fadeAnimation(float fromAlpha, float toAlpha , int repeatCount){
+	public static Animation fadeAnimation(float fromAlpha, float toAlpha , int repeatCount){
 		Animation fade = new AlphaAnimation(fromAlpha, toAlpha);
 		fade.setFillAfter(false);
 		fade.setRepeatCount(repeatCount);
@@ -475,6 +512,12 @@ public class JoystickActivity extends Activity{
 			@Override
 			public void onAnimationEnd(Animation arg0) {
 				v.setVisibility(View.GONE);
+				if(v instanceof ViewGroup){
+					ViewGroup view  =(ViewGroup) v; 
+					for( int i=0; i<view.getChildCount();i++){
+						view.getChildAt(i).setVisibility(View.GONE);
+					}
+				}
 			}
 			@Override
 			public void onAnimationRepeat(Animation arg0) {}
@@ -496,12 +539,18 @@ public class JoystickActivity extends Activity{
 			@Override
 			public void onAnimationStart(Animation animation) {	
 				v.setVisibility(View.VISIBLE);
+				if(v instanceof ViewGroup){
+					ViewGroup view  =(ViewGroup) v; 
+					for( int i=0; i<view.getChildCount();i++){
+						view.getChildAt(i).setVisibility(View.VISIBLE);
+					}
+				}
 			}
 		});
 		v.startAnimation(animate);
 	}
 	
-	public void slideToBottom(final View v){
+	public static void slideToBottom(final View v){
 		TranslateAnimation animate =  new TranslateAnimation(0,0,0,v.getHeight());
 		animate.setDuration(ANIMATION_TIME);
 		animate.setFillAfter(true);
@@ -509,6 +558,12 @@ public class JoystickActivity extends Activity{
 			@Override
 			public void onAnimationEnd(Animation arg0) {
 				v.setVisibility(View.GONE);
+				if(v instanceof ViewGroup){
+					ViewGroup view  =(ViewGroup) v; 
+					for( int i=0; i<view.getChildCount();i++){
+						view.getChildAt(i).setVisibility(View.GONE);
+					}
+				}
 			}
 			@Override
 			public void onAnimationRepeat(Animation arg0) {}
@@ -518,7 +573,7 @@ public class JoystickActivity extends Activity{
 		v.startAnimation(animate);
 	}
 	
-	public void slideToTop(final View v){
+	public static void slideToTop(final View v){
 		TranslateAnimation animate =  new TranslateAnimation(0,0,v.getHeight(),0);
 		animate.setDuration(ANIMATION_TIME);
 		animate.setFillAfter(true);
@@ -528,8 +583,14 @@ public class JoystickActivity extends Activity{
 			@Override
 			public void onAnimationRepeat(Animation arg0) {}
 			@Override
-			public void onAnimationStart(Animation animation) {	
+			public void onAnimationStart(Animation animation) {
 				v.setVisibility(View.VISIBLE);
+				if(v instanceof ViewGroup){
+					ViewGroup view  =(ViewGroup) v; 
+					for( int i=0; i<view.getChildCount();i++){
+						view.getChildAt(i).setVisibility(View.VISIBLE);
+					}
+				}
 			}
 		});
 		v.startAnimation(animate);

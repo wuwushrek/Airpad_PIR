@@ -8,6 +8,7 @@
     <string name="programmation">Programmation</string>
     <string name="apropos">A propos</string>
     <string name="tuto">Tutoriel</string>
+    <string name="nom_programme">Nom du Programme</string>
     <dimen name="circ_layout_width">400dp</dimen>
     <dimen name="circ_layout_height">300dp</dimen>
     <dimen name="im_focus_width">250dp</dimen>

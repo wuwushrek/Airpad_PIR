@@ -20,6 +20,7 @@ public class JoystickCustomView extends View implements Runnable {
 	private OnJoystickMoveListener onJoystickMoveListener; // Listener
 	private Thread thread = new Thread(this);
 	
+	private int currentEventId =-1;
 	private final double RAD = 57.2957795;
 	private float stick_scale;
 	private int dim;//moving joystick
@@ -56,6 +57,14 @@ public class JoystickCustomView extends View implements Runnable {
 		joystick = img;
 	}
 
+	public void setCurrentEventId(int id){
+		currentEventId= id;
+	}
+	
+	public int getCurrentEventId(){
+		return currentEventId;
+	}
+	
 	@SuppressWarnings("deprecation")
 	private void initAttrs(AttributeSet attrs) {
 		TypedArray a = getContext().obtainStyledAttributes(attrs,
@@ -83,7 +92,7 @@ public class JoystickCustomView extends View implements Runnable {
 		dim = (int) (d * stick_scale/2.0);
 		envelopeRadius = d/2;
 		radGrad= new RadialGradient(xNew/2,yNew/2,envelopeRadius,new int[]{stroke_start_color,stroke_middle_color,
-				stroke_end_color}, new float[]{0.8f,0.9f,1.0f},Shader.TileMode.MIRROR);
+				stroke_end_color}, new float[]{0.8f,0.9f,1.0f},Shader.TileMode.CLAMP);
 
 	}
 
@@ -127,8 +136,22 @@ public class JoystickCustomView extends View implements Runnable {
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		xPosition = (int) event.getX();
-		yPosition = (int) event.getY();
+		int pointerId = event.getPointerId(event.getActionIndex());
+		if (event.getAction() == MotionEvent.ACTION_UP) {
+			System.out.println(" "+ currentEventId + " is ACTION UP");
+			xPosition = (int) centerX;
+			yPosition = (int) centerY;
+			thread.interrupt();
+			if (onJoystickMoveListener != null)
+				onJoystickMoveListener.onValueChanged(getAngle(), getPower());
+			return true;
+		}
+		if(pointerId != currentEventId){
+			return false;
+		}
+		int pointerIndex = event.findPointerIndex(currentEventId);
+		xPosition = (int) event.getX(pointerIndex);
+		yPosition = (int) event.getY(pointerIndex);
 		double abs = Math.sqrt((xPosition - centerX) * (xPosition - centerX)
 				+ (yPosition - centerY) * (yPosition - centerY));
 		if (abs > (envelopeRadius-dim)) {
@@ -136,15 +159,9 @@ public class JoystickCustomView extends View implements Runnable {
 			yPosition = (int) ((yPosition - centerY) * (envelopeRadius-dim) / abs + centerY);
 		}
 		invalidate();
-		if (event.getAction() == MotionEvent.ACTION_UP) {
-			xPosition = (int) centerX;
-			yPosition = (int) centerY;
-			thread.interrupt();
-			if (onJoystickMoveListener != null)
-				onJoystickMoveListener.onValueChanged(getAngle(), getPower());
-		}
 		if (onJoystickMoveListener != null
-				&& event.getAction() == MotionEvent.ACTION_DOWN) {
+				&& (event.getAction() == MotionEvent.ACTION_DOWN)) {
+			System.out.println(" "+ currentEventId + " is ACTION DOWN");
 			if (thread != null && thread.isAlive()) {
 				thread.interrupt();
 			}
