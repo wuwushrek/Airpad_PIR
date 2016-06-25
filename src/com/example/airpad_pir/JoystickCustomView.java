@@ -192,9 +192,9 @@ public class JoystickCustomView extends View implements Runnable {
 	}
 
 	private double getPower() {
-		return 100.0 * (Math.sqrt((xPosition - centerX)
+		return Math.sqrt((xPosition - centerX)
 				* (xPosition - centerX) + (yPosition - centerY)
-				* (yPosition - centerY)) /(envelopeRadius-dim));
+				* (yPosition - centerY)) /(envelopeRadius-dim); //100
 	}
 
 	public void setOnJoystickMoveListener(OnJoystickMoveListener listener,
@@ -206,12 +206,15 @@ public class JoystickCustomView extends View implements Runnable {
 	@Override
 	public void run() {
 		while (!Thread.interrupted()) {
-			post(new Runnable() {
+			/*post(new Runnable() {
 				public void run() {
 					if (onJoystickMoveListener != null)
 						onJoystickMoveListener.onValueChanged(getAngle(),getPower());
 				}
-			});
+			});*/
+
+			if (onJoystickMoveListener != null)
+				onJoystickMoveListener.onValueChanged(getAngle(),getPower());
 			try {
 				Thread.sleep(loopInterval);
 			} catch (InterruptedException e) {

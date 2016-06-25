@@ -11,7 +11,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
 
-public class Drone2DRendering extends View {
+public class Drone2DRendering extends View implements WhenDroneMove {
 
 	private static int MAX_RAYON_PIXEL = 70;
 	private Drone mDrone;
@@ -183,5 +183,20 @@ public class Drone2DRendering extends View {
 	
 	public RectF myOval(float width , float height ,float x , float y){
 		return new RectF(x-width/2,y-height/2,x+width/2,y+height/2);
+	}
+
+	@Override
+	public void repaintDrone() {
+		this.postInvalidate(-40,-40, 2*MAX_RAYON_PIXEL+60, getHeight()+40);
+		/*
+		background.top=-40;
+		background.left=-40;
+		background.right=xNew+40;
+		background.bottom=yNew+40;*/
+	}
+
+	@Override
+	public boolean isVisible() {
+		return this.getVisibility()==View.VISIBLE;
 	}
 }

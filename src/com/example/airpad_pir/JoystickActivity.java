@@ -3,6 +3,7 @@ package com.example.airpad_pir;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ public class JoystickActivity extends Activity{
 	private int extraYTop;
 	private long timeWhenStopped =0;
 	
+	public static ProgressDialog progress;
 	private ButtonsListener mButtonListener;
 	
 	private TextView angleTextView;
@@ -76,6 +78,7 @@ public class JoystickActivity extends Activity{
 	private Button battery;
 	private ImageButton cameraButton;
 	private Button missionControl;
+	private BluetoothHandle mBluetooth;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -127,17 +130,14 @@ public class JoystickActivity extends Activity{
 
 			@Override
 			public void onValueChanged(double angle, double power) {
-				// TODO Auto-generated method stub
-				//angleTextView.setText("Angle: " + String.valueOf(angle) + "°");
-				//powerTextView.setText("Power: " + String.valueOf(power) + "%");
+				mDrone.moveTo(angle, power);
 			}
 		}, JoystickCustomView.DEFAULT_LOOP_INTERVAL);
 		throttle.setOnJoystickMoveListener(new OnJoystickMoveListener() {
 
 			@Override
 			public void onValueChanged(double angle, double power) {
-				// TODO Auto-generated method stub
-				//A modifier
+				mDrone.moveVitesse(angle, power);
 			}
 		}, JoystickCustomView.DEFAULT_LOOP_INTERVAL);
 		
@@ -159,37 +159,6 @@ public class JoystickActivity extends Activity{
 				startConnection();
 			}
 		});
-		
-		/*playChrono.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				playChrono();
-			}
-		});
-		pauseChrono.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				pauseChrono();
-			}
-		});
-		stopChrono.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				stopChrono();
-			}
-		});
-		showSpeed.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showSpeedometer();
-			}
-		});
-		showPerspectiveView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showPlanView();
-			}
-		});*/
 		
 		homeButton.setOnClickListener(mButtonListener);
 		backButton.setOnClickListener(mButtonListener);
@@ -224,7 +193,23 @@ public class JoystickActivity extends Activity{
 		extraYTop =getResources().getDimensionPixelSize(R.dimen.top_menu_height);
 
 		mDrone = new Drone();
+		droneRendering.setDrone(mDrone);
+		mDrone.setActionWhenDroneMove(droneRendering);
+		mBluetooth = new BluetoothHandle(this,mDrone);
 	}
+	
+	@Override
+	protected void onDestroy(){
+		super.onDestroy();
+		mBluetooth.disconnect();
+	}
+	
+	@Override
+	protected void onPause(){
+		super.onPause();
+		mBluetooth.disconnect();
+	}
+	
 	@Override
 	public Dialog onCreateDialog(int id){
 		AlertDialog.Builder box = null;
@@ -266,6 +251,7 @@ public class JoystickActivity extends Activity{
 			if(joystick.getCurrentEventId() == pointerId){
 				joystick.setVisibility(View.GONE);
 				joystick.setCurrentEventId(-1);
+				mBluetooth.stopSendingPosition();
 			}else if (throttle.getCurrentEventId()== pointerId){
 				throttle.setVisibility(View.GONE);
 				throttle.setCurrentEventId(-1);
@@ -286,6 +272,7 @@ public class JoystickActivity extends Activity{
 			if(joystick.getCurrentEventId()== pointerId){
 				joystick.setVisibility(View.GONE);
 				joystick.setCurrentEventId(-1);
+				mBluetooth.stopSendingPosition();
 			}else if(throttle.getCurrentEventId() == pointerId){
 				throttle.setVisibility(View.GONE);
 				throttle.setCurrentEventId(-1);
@@ -300,6 +287,7 @@ public class JoystickActivity extends Activity{
 				joystick.setTranslationY(adaptedCoordinateY(relativePosY,mainLayout.getHeight(),joystick.getHeight()/2));
 				joystick.setVisibility(View.VISIBLE);
 				joystick.setCurrentEventId(pointerId);
+				mBluetooth.startSendingPosition();
 			}
 			if((relativePosX>mainLayout.getWidth()/2) && (relativePosY<mainLayout.getHeight()-extraYBottom)
 				&& (relativePosY>extraYTop)){
@@ -308,7 +296,6 @@ public class JoystickActivity extends Activity{
 				throttle.setVisibility(View.VISIBLE);
 				throttle.setCurrentEventId(pointerId);
 			}
-			System.out.println(relativePosX+" , "+relativePosY);
 		}
 		return super.dispatchTouchEvent(ev);
 	}
@@ -350,9 +337,16 @@ public class JoystickActivity extends Activity{
 		showDialog(ID_CAMERA_LAUNCH);
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void startConnection(){
-		showDialog(ID_BLUETOOTH_LAUNCHING);
+		if(mBluetooth.isConnect()){
+			startControl.setBackgroundResource(R.drawable.round_button_selector);
+			mBluetooth.disconnect();
+			System.out.println("EST EN TRAIN DE DECONNECTER");
+		}else{
+			startControl.setBackgroundResource(R.drawable.red_button_pressed);
+			mBluetooth.connect();
+			System.out.println("EST EN TRAIN DE SE CONNECTER");
+		}
 	}
 	
 	public void openMissionsSetting(){
