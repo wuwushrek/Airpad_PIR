@@ -8,29 +8,6 @@
     android:background="@drawable/background_control"
     android:clipChildren="false"
     tools:context=".JoystickActivity" >
-
-    <LinearLayout
-        android:id="@+id/lin_lay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:gravity="center"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/angleTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white" />
-
-        <TextView
-            android:id="@+id/powerTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white" />
-    </LinearLayout>
-
     <com.example.airpad_pir.JoystickCustomView
         android:id="@+id/joystickView"
         android:layout_width="150dp"
@@ -387,23 +364,10 @@
         android:id="@+id/play_accelero_button"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="100dp"
+        android:layout_centerInParent="true"
         android:background="@drawable/round_button_selector"
         android:visibility="gone"
         android:text="PLAY"
-        />
-    <Button 
-        android:id="@+id/pause_accelero_button"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="100dp"
-        android:background="@drawable/round_button_selector"
-        android:visibility="gone"
-        android:text="PAUSE"
         />
     <com.example.airpad_pir.Drone2DRendering
         android:id="@+id/droneVue"

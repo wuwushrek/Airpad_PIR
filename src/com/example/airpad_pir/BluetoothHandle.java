@@ -246,9 +246,16 @@ public class BluetoothHandle {
 				Toast.makeText(mContext, "Connection Reussie !",
 						Toast.LENGTH_LONG).show();
 				isBTConnect = true;
+				mDrone.setDesireAngle(0.0);
 				launchAcquisition();
 				if(isUsingSensor){
 					launchAccelerometerTransfert();
+				}else{
+					try {
+						sendConsigne();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			//JoystickActivity.progress.dismiss();

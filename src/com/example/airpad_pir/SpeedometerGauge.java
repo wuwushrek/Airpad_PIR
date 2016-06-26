@@ -16,14 +16,6 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Speedometer with needle.
- *
- * Created by danon on 26.02.14.
- * @version 1.0
- * @author Anton Danshin <a href="mailto:anton.danshin@frtk.ru">anton.danshin@frtk.ru</a>
- */
 public class SpeedometerGauge extends View {
 
     //private static final String TAG = SpeedometerGauge.class.getSimpleName();
@@ -40,7 +32,7 @@ public class SpeedometerGauge extends View {
     private double majorTickStep = DEFAULT_MAJOR_TICK_STEP;
     private int minorTicks = DEFAULT_MINOR_TICKS;
     private LabelConverter labelConverter;
-    private String unitsText = "km/h";
+    private String unitsText = "%";
 
     private List<ColoredRange> ranges = new ArrayList<ColoredRange>();
 

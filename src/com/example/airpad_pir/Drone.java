@@ -1,12 +1,14 @@
 package com.example.airpad_pir;
 
+import android.view.View;
+
 public class Drone {
 	public static  final int MAX_RAYON = 100;// en cm
 	public static final int MAX_ALTITUDE = 1000; // en cm
-	private volatile static double MAX_DEPLACEMENT = 5; // en angle
-	private static final double MAX_VITESSE  = 2;
+	private volatile static double MAX_DEPLACEMENT = 30;
+	private static final double MAX_VITESSE  = 0.01;
 	public static final double MAX_ANGLE = 180; // en degre
-	public static final double MAX_D_VITESSE =10;
+	public static final double MAX_D_VITESSE =1.0;
 	
 	private double currentRayon;
 	
@@ -18,6 +20,7 @@ public class Drone {
 	private double yPosition;
 	private double zPosition;
 	private WhenDroneMove mDroneObserver;
+	private SpeedometerGauge mSpeed;
 	
 	public Drone(){
 		xPosition = MAX_RAYON;
@@ -28,7 +31,7 @@ public class Drone {
 		currentAngle = 0;
 		
 		currentRayon = MAX_RAYON;
-		currentVitesse = 0;
+		currentVitesse = 0.5;
 	}
 	
 	public Drone (double xPosition , double yPosition , double zPosition){
@@ -49,15 +52,20 @@ public class Drone {
 		mDroneObserver = droneObserver;
 	}
 	
-	public synchronized double getXPosition(){
+	public void setActionWhenVitesseChange(SpeedometerGauge speed){
+		mSpeed = speed;
+		mSpeed.setSpeed(currentVitesse*100);
+	}
+	
+	public double getXPosition(){
 		return xPosition;
 	}
 	
-	public synchronized double getYPosition(){
+	public double getYPosition(){
 		return yPosition;
 	}
 	
-	public synchronized void setCurrentAngle(double angle){
+	public void setCurrentAngle(double angle){
 		currentAngle = angle;
 	}
 	
@@ -71,14 +79,20 @@ public class Drone {
 	
 	public void moveTo(double angle ,double power){
 		double angleRad = Math.sin(Math.toRadians(angle));
-		double dist = (MAX_DEPLACEMENT+currentVitesse)*power;
+		double dist =0;
+		synchronized(this){
+			dist = (MAX_DEPLACEMENT*currentVitesse)*power;
+		}
 		double deltaAngle = angleRad*dist;
-		//double deltaY = Math.sin(angleRad)*dist; /:Pas besoin vu 1 seul degre de liberte
 		incrementPosition(deltaAngle);
 	}
 	
 	public double getDesireAngle(){
 		return desireAngle;
+	}
+	
+	public void setDesireAngle(double angle){
+		desireAngle = angle;
 	}
 	
 	public void moveVitesse(double angle , double power){
@@ -104,7 +118,7 @@ public class Drone {
 		}
 		desireAngle=res;
 	}
-	public void incrementVitesse(double deltaVitesse){
+	public synchronized void incrementVitesse(double deltaVitesse){
 		/*if(Math.abs(desireAngle+deltaAngle)>MAX_ANGLE){
 			desireAngle=MAX_ANGLE;
 		}else{
@@ -113,17 +127,23 @@ public class Drone {
 		double res = currentVitesse;
 		if(res+deltaVitesse>MAX_D_VITESSE){
 			res=MAX_D_VITESSE;
-		}else if((res+deltaVitesse)<-MAX_D_VITESSE){
-			res= -MAX_D_VITESSE;
+		}else if((res+deltaVitesse)<0){
+			res= 0;
 		}else {
 			res+=deltaVitesse;
 		}
-		res+=MAX_D_VITESSE;
 		currentVitesse=res;
-		
+		if(mSpeed.getVisibility()==View.VISIBLE){
+			mSpeed.post(new Runnable(){
+				@Override
+				public void run() {
+					mSpeed.setSpeed(currentVitesse*100);
+				}
+			});
+		}
 	}
 	
-	public synchronized void setPosition(){
+	public void setPosition(){
 		if(mDroneObserver!=null && mDroneObserver.isVisible()){
 			double angleRadian = Math.toRadians(currentAngle);
 			xPosition= Math.cos(angleRadian)*currentRayon;
