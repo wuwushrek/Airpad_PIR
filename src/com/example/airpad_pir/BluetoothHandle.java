@@ -2,10 +2,8 @@ package com.example.airpad_pir;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Semaphore;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -20,7 +18,6 @@ import android.widget.Toast;
 public class BluetoothHandle {
 	
 	private final static long DELAY_ENVOI = 100;
-	private final static long DELAY_RECEPTION = 100;
 	private final static char DELIMITER = '\n';
 	
 	private BluetoothAdapter myBluetooth = null;
@@ -33,14 +30,18 @@ public class BluetoothHandle {
 	static final UUID myUUID = UUID
 			.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
-	private final int POTARD_MIN = 0;
-	private final int POTARD_MAX = 1023;
+	private final int POTARD_MIN = 180;
+	private final int POTARD_MAX = 830;
+	private final int ACC_MAX = 10;
 	
 	private volatile boolean isSendingPosition = false;
+	public volatile boolean isUsingSensor = false;
 
 	private Drone mDrone;
 	private SendData send = new SendData();
 	private ReceiveData receive = new ReceiveData();
+	private TransfertSensor transfertSensor = new TransfertSensor();
+	public double angleToSendAccelerometer;
 
 	public BluetoothHandle(Context context, Drone drone) {
 		mContext = context;
@@ -53,6 +54,7 @@ public class BluetoothHandle {
 			Intent turnBOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			((Activity) mContext).startActivityForResult(turnBOn, 1);
 		}
+		angleToSendAccelerometer = mDrone.getDesireAngle();
 	}
 
 	@SuppressLint("NewApi")
@@ -99,7 +101,11 @@ public class BluetoothHandle {
 			System.out.println("SEND VALUE: "+to);
 		}
 	}
-
+	
+	public void changeAccelConsigne(double value){
+		angleToSendAccelerometer= (((value + ACC_MAX) * (POTARD_MAX-POTARD_MIN) / (2*ACC_MAX)) +POTARD_MIN);
+	}
+	
 	public void getPosition() throws IOException {
 		if (btSocket != null) {
 			byte ch,buffer[] = new byte[1024];
@@ -134,12 +140,21 @@ public class BluetoothHandle {
 	}
 	
 	public void startSendingPosition(){
+		if(!isBTConnect)
+			return ;
 		isSendingPosition = true;
 		new Thread(send).start();
 	}
 	
 	public void stopSendingPosition(){
 		isSendingPosition = false;
+	}
+	
+	public void launchAccelerometerTransfert(){
+		new Thread(transfertSensor).start();
+	}
+	public void setUsingSensor(boolean value){
+		isUsingSensor = value;
 	}
 	
 	class SendData implements Runnable{
@@ -165,6 +180,23 @@ public class BluetoothHandle {
 				try {
 					getPosition();
 				}catch(IOException e){
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	class TransfertSensor implements Runnable{
+		@Override
+		public void run(){
+			while (isUsingSensor && isBTConnect){
+				try {
+					String to =String.valueOf((int) angleToSendAccelerometer)+'\n';
+					btSocket.getOutputStream().write(to.getBytes());
+					Thread.sleep(DELAY_ENVOI);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -215,6 +247,9 @@ public class BluetoothHandle {
 						Toast.LENGTH_LONG).show();
 				isBTConnect = true;
 				launchAcquisition();
+				if(isUsingSensor){
+					launchAccelerometerTransfert();
+				}
 			}
 			//JoystickActivity.progress.dismiss();
 		}

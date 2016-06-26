@@ -383,6 +383,28 @@
             android:layout_alignTop="@id/gyro_select"
             android:layout_toRightOf="@id/gyro_select"/>
     </RelativeLayout>
+    <Button 
+        android:id="@+id/play_accelero_button"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="100dp"
+        android:background="@drawable/round_button_selector"
+        android:visibility="gone"
+        android:text="PLAY"
+        />
+    <Button 
+        android:id="@+id/pause_accelero_button"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="100dp"
+        android:background="@drawable/round_button_selector"
+        android:visibility="gone"
+        android:text="PAUSE"
+        />
     <com.example.airpad_pir.Drone2DRendering
         android:id="@+id/droneVue"
         android:layout_width="400dp"

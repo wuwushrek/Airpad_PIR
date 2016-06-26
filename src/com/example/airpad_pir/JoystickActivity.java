@@ -4,8 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.MotionEvent;
@@ -19,15 +24,24 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.example.airpad_pir.JoystickCustomView.OnJoystickMoveListener;
 
 //https://github.com/bilthon/Android-Speedometer
-public class JoystickActivity extends Activity{
+public class JoystickActivity extends Activity implements SensorEventListener{
+	
+	private SensorManager sensorManager;
+	private Sensor senAccelerometer;
+	private long lastUpdate =0;
+	private float last_x,last_y,last_z;
+	private static final int SHAKE_THRESHOLD = 200;
+	private boolean pausingGyro = false;
 	
 	private static final int ID_BLUETOOTH_LAUNCHING =0;
 	private static final int ID_CAMERA_LAUNCH =1;
@@ -78,13 +92,21 @@ public class JoystickActivity extends Activity{
 	private Button battery;
 	private ImageButton cameraButton;
 	private Button missionControl;
+	private Switch gyro_select;
+	private Button pauseGyro;
+	private Button playGyro;
+	
 	private BluetoothHandle mBluetooth;
 
+	private boolean useAccelerometer = false;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.control_drone_layout);
+		
+		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		senAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		
 		//bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
 		//upBottom = AnimationUtils.loadAnimation(this, R.anim.up_bottom);
@@ -125,6 +147,9 @@ public class JoystickActivity extends Activity{
 		joystick = (JoystickCustomView) findViewById(R.id.joystickView);
 		throttle = (JoystickCustomView) findViewById(R.id.throttleView);
 		droneRendering = (Drone2DRendering) findViewById(R.id.droneVue);
+		gyro_select = (Switch) findViewById(R.id.gyro_select_value);
+		pauseGyro = (Button) findViewById(R.id.pause_accelero_button);
+		playGyro = (Button) findViewById(R.id.play_accelero_button);
 		
 		joystick.setOnJoystickMoveListener(new OnJoystickMoveListener() {
 
@@ -178,6 +203,67 @@ public class JoystickActivity extends Activity{
 				return String.valueOf((int) Math.round(progress));
 			}
 		});
+		gyro_select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if(isChecked){
+					useAccelerometer=true;
+					mBluetooth.setUsingSensor(useAccelerometer);
+					sensorManager.registerListener(JoystickActivity.this, senAccelerometer,SensorManager.SENSOR_DELAY_NORMAL);
+					if(mBluetooth.isConnect()){
+						mBluetooth.launchAccelerometerTransfert();
+						pauseGyro.setEnabled(true);
+						playGyro.setEnabled(false);
+						playGyro.setAlpha(0.85f);
+						pauseGyro.setAlpha(1.0f);
+					}else{
+						playGyro.setEnabled(true);
+						pauseGyro.setEnabled(false);
+						playGyro.setAlpha(1.0f);
+						pauseGyro.setAlpha(0.85f);
+					}
+					playGyro.setVisibility(View.VISIBLE);
+					pauseGyro.setVisibility(View.VISIBLE);
+					pausingGyro=false;
+					
+				}else {
+					useAccelerometer=false;
+					mBluetooth.setUsingSensor(false);
+					sensorManager.unregisterListener(JoystickActivity.this);
+					playGyro.setVisibility(View.GONE);
+					pauseGyro.setVisibility(View.GONE);
+				}
+			}
+		});
+		
+		playGyro.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				pausingGyro=false;
+				pauseGyro.setEnabled(true);
+				playGyro.setEnabled(false);
+				playGyro.setAlpha(0.85f);
+				pauseGyro.setAlpha(1.0f);
+				mBluetooth.setUsingSensor(true);
+				if(!mBluetooth.isConnect()){
+					mBluetooth.connect();
+				}else{
+					mBluetooth.launchAccelerometerTransfert();
+				}
+			}
+		});
+		
+		pauseGyro.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				pausingGyro=true;
+				playGyro.setEnabled(true);
+				pauseGyro.setEnabled(false);
+				playGyro.setAlpha(1.0f);
+				pauseGyro.setAlpha(0.85f);
+				mBluetooth.setUsingSensor(false);
+			}
+		});
 		speedometer.setMaxSpeed(100);
 		speedometer.setMajorTickStep(20);
 		speedometer.setMinorTicks(2);
@@ -188,6 +274,7 @@ public class JoystickActivity extends Activity{
 		informationL.bringToFront();
 		joystick.bringToFront();
 		throttle.bringToFront();
+		menuContent.bringToFront();
 
 		extraYBottom= getResources().getDimensionPixelSize(R.dimen.information_bar_height);
 		extraYTop =getResources().getDimensionPixelSize(R.dimen.top_menu_height);
@@ -196,6 +283,7 @@ public class JoystickActivity extends Activity{
 		droneRendering.setDrone(mDrone);
 		mDrone.setActionWhenDroneMove(droneRendering);
 		mBluetooth = new BluetoothHandle(this,mDrone);
+		//sensorManager.registerListener(this, senAccelerometer,SensorManager.SENSOR_DELAY_NORMAL);
 	}
 	
 	@Override
@@ -208,7 +296,18 @@ public class JoystickActivity extends Activity{
 	protected void onPause(){
 		super.onPause();
 		mBluetooth.disconnect();
+		if(useAccelerometer){
+			sensorManager.unregisterListener(this);
+		}
 	}
+	@Override
+	protected void onResume(){
+		super.onResume();
+		if(useAccelerometer){
+			sensorManager.registerListener(this, senAccelerometer,SensorManager.SENSOR_DELAY_NORMAL);
+		}
+	}
+	
 	
 	@Override
 	public Dialog onCreateDialog(int id){
@@ -267,7 +366,8 @@ public class JoystickActivity extends Activity{
 				slideUpDown(informationL);
 			}
 		}
-		
+		if(useAccelerometer)
+			return super.dispatchTouchEvent(ev);
 		if(ev.getActionMasked()==MotionEvent.ACTION_POINTER_UP){
 			if(joystick.getCurrentEventId()== pointerId){
 				joystick.setVisibility(View.GONE);
@@ -626,6 +726,45 @@ public class JoystickActivity extends Activity{
 				public void onAnimationStart(Animation animation) {}
 			});
 		}	
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent sensorEvent) {
+		Sensor mySensor = sensorEvent.sensor;
+	    if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+	    	//float x = sensorEvent.values[0];
+	        //float y = sensorEvent.values[1];
+	        //float z = sensorEvent.values[2];
+	    	float x = -sensorEvent.values[1];
+	    	float y = sensorEvent.values[0];
+	    	float z = sensorEvent.values[2];
+	        long curTime = System.currentTimeMillis();
+	        
+	        if ((curTime - lastUpdate) > 100) {
+	            //long diffTime = (curTime - lastUpdate);
+	            lastUpdate = curTime;
+	            //float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
+            	//System.out.println("X: "+x +" Y:  "+y+" Z: "+z);
+            	if(Math.abs(y-last_y)<0.5){
+            		return;
+            	}
+	            /*if (speed > SHAKE_THRESHOLD) {
+	            	System.out.println("ON DEPASSE SEUIL: "+" X: "+x +" Y:  "+y+" Z: "+z);
+	            }*/
+            	if(pausingGyro)
+            		return;
+	            last_x = x;
+	            last_y = y;
+	            last_z = z;
+	            mBluetooth.changeAccelConsigne(y);
+	        }
+	    }
 	}
 	
 }

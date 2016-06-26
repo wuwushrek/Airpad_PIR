@@ -3,10 +3,10 @@ package com.example.airpad_pir;
 public class Drone {
 	public static  final int MAX_RAYON = 100;// en cm
 	public static final int MAX_ALTITUDE = 1000; // en cm
-	private volatile static double MAX_DEPLACEMENT = 10; // en angle
-	private static final double MAX_VITESSE  = 5;
+	private volatile static double MAX_DEPLACEMENT = 5; // en angle
+	private static final double MAX_VITESSE  = 2;
 	public static final double MAX_ANGLE = 180; // en degre
-	public static final double MAX_D_VITESSE =15;
+	public static final double MAX_D_VITESSE =10;
 	
 	private double currentRayon;
 	
@@ -70,9 +70,9 @@ public class Drone {
 	}
 	
 	public void moveTo(double angle ,double power){
-		double angleRad = Math.toRadians(angle);
+		double angleRad = Math.sin(Math.toRadians(angle));
 		double dist = (MAX_DEPLACEMENT+currentVitesse)*power;
-		double deltaAngle = Math.sin(angleRad)*dist;
+		double deltaAngle = angleRad*dist;
 		//double deltaY = Math.sin(angleRad)*dist; /:Pas besoin vu 1 seul degre de liberte
 		incrementPosition(deltaAngle);
 	}
@@ -118,6 +118,7 @@ public class Drone {
 		}else {
 			res+=deltaVitesse;
 		}
+		res+=MAX_D_VITESSE;
 		currentVitesse=res;
 		
 	}
